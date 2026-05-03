@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="StrangeSort/StrangeSort.csproj" />
+  <Project Path="StrangeSortTest/StrangeSortTest.csproj" />
+</Solution>
