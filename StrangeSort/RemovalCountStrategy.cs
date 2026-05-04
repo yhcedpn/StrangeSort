@@ -1,17 +1,17 @@
 namespace StrangeSort;
 
 /// <summary>
-/// Specifies how many elements each pruning round removes when the current sequence length is odd.
+/// 指定当前序列长度为奇数时，每轮剪枝删除多少个元素。
 /// </summary>
 public enum RemovalCountStrategy
 {
     /// <summary>
-    /// Removes <c>count / 2</c> elements.
+    /// 删除 <c>count / 2</c> 个元素。
     /// </summary>
     FloorHalf = 0,
 
     /// <summary>
-    /// Removes <c>(count + 1) / 2</c> elements.
+    /// 删除 <c>(count + 1) / 2</c> 个元素。
     /// </summary>
     CeilingHalf = 1,
 }
