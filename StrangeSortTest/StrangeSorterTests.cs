@@ -253,11 +253,35 @@ public sealed class StrangeSorterTests
     }
 
     [Fact]
+    public void PruneUntilSorted_Array_PropagatesComparerExceptions_WithoutMutatingInput()
+    {
+        var values = new[] { 3, 1, 2 };
+        var snapshot = (int[])values.Clone();
+        var expectedException = new InvalidOperationException("The comparer failed.");
+
+        var actualException = Assert.Throws<InvalidOperationException>(() => StrangeSorter.PruneUntilSorted(values, CreateComparerThatThrowsOnThirdComparison(expectedException), RemovalCountStrategy.FloorHalf, new ZeroSampleRandom()));
+
+        Assert.Same(expectedException, actualException);
+        Assert.Equal(snapshot, values);
+    }
+
+    [Fact]
     public void PruneUntilSorted_List_PropagatesRandomExceptions()
     {
         var values = new List<int> { 3, 1, 2 };
 
         Assert.Throws<InvalidOperationException>(() => StrangeSorter.PruneUntilSorted(values, comparer: null, RemovalCountStrategy.FloorHalf, new ThrowingRandom()));
+    }
+
+    [Fact]
+    public void PruneUntilSorted_List_PropagatesComparerExceptions()
+    {
+        var values = new List<int> { 3, 1, 2 };
+        var expectedException = new InvalidOperationException("The comparer failed.");
+
+        var actualException = Assert.Throws<InvalidOperationException>(() => StrangeSorter.PruneUntilSorted(values, CreateComparerThatThrowsOnThirdComparison(expectedException), RemovalCountStrategy.FloorHalf, new ZeroSampleRandom()));
+
+        Assert.Same(expectedException, actualException);
     }
 
     [Fact]
@@ -302,6 +326,22 @@ public sealed class StrangeSorterTests
             Assert.True(sourceIndex < source.Count);
             sourceIndex++;
         }
+    }
+
+    private static IComparer<int> CreateComparerThatThrowsOnThirdComparison(Exception exception)
+    {
+        var compareCount = 0;
+
+        return Comparer<int>.Create((left, right) =>
+        {
+            compareCount++;
+            if (compareCount == 3)
+            {
+                throw exception;
+            }
+
+            return left.CompareTo(right);
+        });
     }
 
     private sealed class NonComparable
