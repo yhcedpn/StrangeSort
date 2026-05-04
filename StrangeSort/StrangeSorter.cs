@@ -100,6 +100,7 @@ public static class StrangeSorter
     /// </summary>
     /// <remarks>
     /// 此重载使用 <see cref="Comparer{T}.Default"/>、<see cref="RemovalCountStrategy.FloorHalf"/> 和 <see cref="Random.Shared"/>。
+    /// 如果在剪枝开始后比较器或随机源抛出异常，列表可能已经被部分修改，且不会回滚。
     /// </remarks>
     /// <param name="values">要原地剪枝的列表。</param>
     /// <exception cref="ArgumentNullException"><paramref name="values"/> 为 <see langword="null"/>。</exception>
@@ -114,6 +115,7 @@ public static class StrangeSorter
     /// </summary>
     /// <remarks>
     /// 此重载使用提供的比较器；当 <paramref name="comparer"/> 为 <see langword="null"/> 时使用 <see cref="Comparer{T}.Default"/>，并搭配 <see cref="RemovalCountStrategy.FloorHalf"/> 和 <see cref="Random.Shared"/>。
+    /// 如果在剪枝开始后比较器或随机源抛出异常，列表可能已经被部分修改，且不会回滚。
     /// </remarks>
     /// <param name="values">要原地剪枝的列表。</param>
     /// <param name="comparer">定义目标顺序的比较器。为 <see langword="null"/> 时使用 <see cref="Comparer{T}.Default"/>。</param>
@@ -129,6 +131,7 @@ public static class StrangeSorter
     /// </summary>
     /// <remarks>
     /// 此重载使用提供的比较器；当 <paramref name="comparer"/> 为 <see langword="null"/> 时使用 <see cref="Comparer{T}.Default"/>，并搭配提供的删除策略和 <see cref="Random.Shared"/>。
+    /// 如果在剪枝开始后比较器或随机源抛出异常，列表可能已经被部分修改，且不会回滚。
     /// </remarks>
     /// <param name="values">要原地剪枝的列表。</param>
     /// <param name="comparer">定义目标顺序的比较器。为 <see langword="null"/> 时使用 <see cref="Comparer{T}.Default"/>。</param>
