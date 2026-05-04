@@ -1,19 +1,19 @@
-using StrangeSort;
+using StrangeSort.ThanosSort;
 
-namespace StrangeSortTest;
+namespace StrangeSortTest.ThanosSort;
 
-public sealed class StrangeSorterTests
+public sealed class ThanosSorterTests
 {
     [Fact]
     public void PruneUntilSorted_Array_NullValues_Throws()
     {
-        Assert.Throws<ArgumentNullException>(() => StrangeSorter.PruneUntilSorted((int[]?)null!));
+        Assert.Throws<ArgumentNullException>(() => ThanosSorter.PruneUntilSorted((int[]?)null!));
     }
 
     [Fact]
     public void PruneUntilSorted_List_NullValues_Throws()
     {
-        Assert.Throws<ArgumentNullException>(() => StrangeSorter.PruneUntilSorted((List<int>?)null!));
+        Assert.Throws<ArgumentNullException>(() => ThanosSorter.PruneUntilSorted((List<int>?)null!));
     }
 
     [Fact]
@@ -21,7 +21,7 @@ public sealed class StrangeSorterTests
     {
         var values = new[] { 2, 1 };
 
-        Assert.Throws<ArgumentNullException>(() => StrangeSorter.PruneUntilSorted(values, comparer: null, RemovalCountStrategy.FloorHalf, random: null!));
+        Assert.Throws<ArgumentNullException>(() => ThanosSorter.PruneUntilSorted(values, comparer: null, RemovalCountStrategy.FloorHalf, random: null!));
     }
 
     [Fact]
@@ -29,7 +29,7 @@ public sealed class StrangeSorterTests
     {
         var values = new List<int> { 2, 1 };
 
-        Assert.Throws<ArgumentNullException>(() => StrangeSorter.PruneUntilSorted(values, comparer: null, RemovalCountStrategy.FloorHalf, random: null!));
+        Assert.Throws<ArgumentNullException>(() => ThanosSorter.PruneUntilSorted(values, comparer: null, RemovalCountStrategy.FloorHalf, random: null!));
     }
 
     [Theory]
@@ -39,7 +39,7 @@ public sealed class StrangeSorterTests
     {
         var values = new[] { 2, 1 };
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => StrangeSorter.PruneUntilSorted(values, comparer: null, removalStrategy, new Random(7)));
+        Assert.Throws<ArgumentOutOfRangeException>(() => ThanosSorter.PruneUntilSorted(values, comparer: null, removalStrategy, new Random(7)));
     }
 
     [Theory]
@@ -49,7 +49,7 @@ public sealed class StrangeSorterTests
     {
         var values = new List<int> { 2, 1 };
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => StrangeSorter.PruneUntilSorted(values, comparer: null, removalStrategy, new Random(7)));
+        Assert.Throws<ArgumentOutOfRangeException>(() => ThanosSorter.PruneUntilSorted(values, comparer: null, removalStrategy, new Random(7)));
     }
 
     [Fact]
@@ -58,8 +58,8 @@ public sealed class StrangeSorterTests
         var empty = Array.Empty<NonComparable>();
         var single = new[] { new NonComparable() };
 
-        var emptyResult = StrangeSorter.PruneUntilSorted(empty);
-        var singleResult = StrangeSorter.PruneUntilSorted(single);
+        var emptyResult = ThanosSorter.PruneUntilSorted(empty);
+        var singleResult = ThanosSorter.PruneUntilSorted(single);
 
         Assert.Empty(emptyResult);
         Assert.Equal(single, singleResult);
@@ -71,8 +71,8 @@ public sealed class StrangeSorterTests
         var empty = new List<NonComparable>();
         var single = new List<NonComparable> { new() };
 
-        StrangeSorter.PruneUntilSorted(empty);
-        StrangeSorter.PruneUntilSorted(single);
+        ThanosSorter.PruneUntilSorted(empty);
+        ThanosSorter.PruneUntilSorted(single);
 
         Assert.Empty(empty);
         Assert.Single(single);
@@ -84,7 +84,7 @@ public sealed class StrangeSorterTests
         var values = new[] { 1, 1, 2, 3 };
         var snapshot = (int[])values.Clone();
 
-        var result = StrangeSorter.PruneUntilSorted(values);
+        var result = ThanosSorter.PruneUntilSorted(values);
 
         Assert.Equal(snapshot, result);
         Assert.Equal(snapshot, values);
@@ -98,7 +98,7 @@ public sealed class StrangeSorterTests
         var values = new List<int> { 1, 1, 2, 3 };
         var snapshot = values.ToArray();
 
-        StrangeSorter.PruneUntilSorted(values);
+        ThanosSorter.PruneUntilSorted(values);
 
         Assert.Equal(snapshot, values);
         AssertOrdered(values);
@@ -111,7 +111,7 @@ public sealed class StrangeSorterTests
         var values = new[] { 5, 1, 4, 4, 2, 3 };
         var snapshot = (int[])values.Clone();
 
-        var result = StrangeSorter.PruneUntilSorted(values, comparer: null, RemovalCountStrategy.CeilingHalf, new Random(12345));
+        var result = ThanosSorter.PruneUntilSorted(values, comparer: null, RemovalCountStrategy.CeilingHalf, new Random(12345));
 
         AssertOrdered(result);
         AssertSubsequence(result, snapshot);
@@ -125,7 +125,7 @@ public sealed class StrangeSorterTests
         var values = new List<int> { 5, 1, 4, 4, 2, 3 };
         var snapshot = values.ToArray();
 
-        StrangeSorter.PruneUntilSorted(values, comparer: null, RemovalCountStrategy.CeilingHalf, new Random(12345));
+        ThanosSorter.PruneUntilSorted(values, comparer: null, RemovalCountStrategy.CeilingHalf, new Random(12345));
 
         AssertOrdered(values);
         AssertSubsequence(values, snapshot);
@@ -137,13 +137,13 @@ public sealed class StrangeSorterTests
     {
         var source = new[] { 8, 3, 6, 1, 5, 2, 7, 4 };
 
-        var arrayWithNullComparer = StrangeSorter.PruneUntilSorted((int[])source.Clone(), comparer: null, RemovalCountStrategy.FloorHalf, new Random(42));
-        var arrayWithDefaultComparer = StrangeSorter.PruneUntilSorted((int[])source.Clone(), Comparer<int>.Default, RemovalCountStrategy.FloorHalf, new Random(42));
+        var arrayWithNullComparer = ThanosSorter.PruneUntilSorted((int[])source.Clone(), comparer: null, RemovalCountStrategy.FloorHalf, new Random(42));
+        var arrayWithDefaultComparer = ThanosSorter.PruneUntilSorted((int[])source.Clone(), Comparer<int>.Default, RemovalCountStrategy.FloorHalf, new Random(42));
 
         var listWithNullComparer = source.ToList();
         var listWithDefaultComparer = source.ToList();
-        StrangeSorter.PruneUntilSorted(listWithNullComparer, comparer: null, RemovalCountStrategy.FloorHalf, new Random(42));
-        StrangeSorter.PruneUntilSorted(listWithDefaultComparer, Comparer<int>.Default, RemovalCountStrategy.FloorHalf, new Random(42));
+        ThanosSorter.PruneUntilSorted(listWithNullComparer, comparer: null, RemovalCountStrategy.FloorHalf, new Random(42));
+        ThanosSorter.PruneUntilSorted(listWithDefaultComparer, Comparer<int>.Default, RemovalCountStrategy.FloorHalf, new Random(42));
 
         Assert.Equal(arrayWithDefaultComparer, arrayWithNullComparer);
         Assert.Equal(listWithDefaultComparer, listWithNullComparer);
@@ -154,8 +154,8 @@ public sealed class StrangeSorterTests
     {
         var values = new[] { 3, 1, 2 };
 
-        var floorResult = StrangeSorter.PruneUntilSorted((int[])values.Clone(), comparer: null, RemovalCountStrategy.FloorHalf, new ZeroSampleRandom());
-        var ceilingResult = StrangeSorter.PruneUntilSorted((int[])values.Clone(), comparer: null, RemovalCountStrategy.CeilingHalf, new ZeroSampleRandom());
+        var floorResult = ThanosSorter.PruneUntilSorted((int[])values.Clone(), comparer: null, RemovalCountStrategy.FloorHalf, new ZeroSampleRandom());
+        var ceilingResult = ThanosSorter.PruneUntilSorted((int[])values.Clone(), comparer: null, RemovalCountStrategy.CeilingHalf, new ZeroSampleRandom());
 
         Assert.Equal(new[] { 1, 2 }, floorResult);
         Assert.Equal(new[] { 2 }, ceilingResult);
@@ -169,10 +169,10 @@ public sealed class StrangeSorterTests
     public void PruneUntilSorted_Array_AndList_WithSameSeed_ProduceSameContent()
     {
         var source = new[] { 9, 1, 8, 2, 7, 3, 6, 4, 5 };
-        var arrayResult = StrangeSorter.PruneUntilSorted((int[])source.Clone(), comparer: null, RemovalCountStrategy.CeilingHalf, new Random(777));
+        var arrayResult = ThanosSorter.PruneUntilSorted((int[])source.Clone(), comparer: null, RemovalCountStrategy.CeilingHalf, new Random(777));
         var listResult = source.ToList();
 
-        StrangeSorter.PruneUntilSorted(listResult, comparer: null, RemovalCountStrategy.CeilingHalf, new Random(777));
+        ThanosSorter.PruneUntilSorted(listResult, comparer: null, RemovalCountStrategy.CeilingHalf, new Random(777));
 
         Assert.Equal(arrayResult, listResult);
     }
@@ -182,8 +182,8 @@ public sealed class StrangeSorterTests
     {
         var source = new[] { 7, 2, 6, 1, 5, 4, 3 };
 
-        var first = StrangeSorter.PruneUntilSorted((int[])source.Clone(), comparer: null, RemovalCountStrategy.FloorHalf, new Random(2026));
-        var second = StrangeSorter.PruneUntilSorted((int[])source.Clone(), comparer: null, RemovalCountStrategy.FloorHalf, new Random(2026));
+        var first = ThanosSorter.PruneUntilSorted((int[])source.Clone(), comparer: null, RemovalCountStrategy.FloorHalf, new Random(2026));
+        var second = ThanosSorter.PruneUntilSorted((int[])source.Clone(), comparer: null, RemovalCountStrategy.FloorHalf, new Random(2026));
 
         Assert.Equal(first, second);
     }
@@ -194,8 +194,8 @@ public sealed class StrangeSorterTests
         var first = new List<int> { 7, 2, 6, 1, 5, 4, 3 };
         var second = new List<int> { 7, 2, 6, 1, 5, 4, 3 };
 
-        StrangeSorter.PruneUntilSorted(first, comparer: null, RemovalCountStrategy.FloorHalf, new Random(2026));
-        StrangeSorter.PruneUntilSorted(second, comparer: null, RemovalCountStrategy.FloorHalf, new Random(2026));
+        ThanosSorter.PruneUntilSorted(first, comparer: null, RemovalCountStrategy.FloorHalf, new Random(2026));
+        ThanosSorter.PruneUntilSorted(second, comparer: null, RemovalCountStrategy.FloorHalf, new Random(2026));
 
         Assert.Equal(first, second);
     }
@@ -206,9 +206,9 @@ public sealed class StrangeSorterTests
         var comparer = Comparer<string>.Create((left, right) => left.Length.CompareTo(right.Length));
         var source = new[] { "pear", "a", "banana", "kiwi", "bb" };
 
-        var arrayResult = StrangeSorter.PruneUntilSorted((string[])source.Clone(), comparer, RemovalCountStrategy.FloorHalf, new Random(314));
+        var arrayResult = ThanosSorter.PruneUntilSorted((string[])source.Clone(), comparer, RemovalCountStrategy.FloorHalf, new Random(314));
         var listResult = source.ToList();
-        StrangeSorter.PruneUntilSorted(listResult, comparer, RemovalCountStrategy.FloorHalf, new Random(314));
+        ThanosSorter.PruneUntilSorted(listResult, comparer, RemovalCountStrategy.FloorHalf, new Random(314));
 
         AssertOrdered(arrayResult, comparer);
         AssertOrdered(listResult, comparer);
@@ -222,9 +222,9 @@ public sealed class StrangeSorterTests
         var comparer = Comparer<int>.Create((left, right) => right.CompareTo(left));
         var source = new[] { 2, 5, 1, 4, 3 };
 
-        var arrayResult = StrangeSorter.PruneUntilSorted((int[])source.Clone(), comparer, RemovalCountStrategy.FloorHalf, new Random(11));
+        var arrayResult = ThanosSorter.PruneUntilSorted((int[])source.Clone(), comparer, RemovalCountStrategy.FloorHalf, new Random(11));
         var listResult = source.ToList();
-        StrangeSorter.PruneUntilSorted(listResult, comparer, RemovalCountStrategy.FloorHalf, new Random(11));
+        ThanosSorter.PruneUntilSorted(listResult, comparer, RemovalCountStrategy.FloorHalf, new Random(11));
 
         AssertOrdered(arrayResult, comparer);
         AssertOrdered(listResult, comparer);
@@ -238,8 +238,8 @@ public sealed class StrangeSorterTests
         var pairArray = new[] { new NonComparable(), new NonComparable() };
         var pairList = new List<NonComparable> { new(), new() };
 
-        Assert.Throws<ArgumentException>(() => StrangeSorter.PruneUntilSorted(pairArray));
-        Assert.Throws<ArgumentException>(() => StrangeSorter.PruneUntilSorted(pairList));
+        Assert.Throws<ArgumentException>(() => ThanosSorter.PruneUntilSorted(pairArray));
+        Assert.Throws<ArgumentException>(() => ThanosSorter.PruneUntilSorted(pairList));
     }
 
     [Fact]
@@ -248,7 +248,7 @@ public sealed class StrangeSorterTests
         var values = new[] { 3, 1, 2 };
         var snapshot = (int[])values.Clone();
 
-        Assert.Throws<InvalidOperationException>(() => StrangeSorter.PruneUntilSorted(values, comparer: null, RemovalCountStrategy.FloorHalf, new ThrowingRandom()));
+        Assert.Throws<InvalidOperationException>(() => ThanosSorter.PruneUntilSorted(values, comparer: null, RemovalCountStrategy.FloorHalf, new ThrowingRandom()));
         Assert.Equal(snapshot, values);
     }
 
@@ -259,7 +259,7 @@ public sealed class StrangeSorterTests
         var snapshot = (int[])values.Clone();
         var expectedException = new InvalidOperationException("The comparer failed.");
 
-        var actualException = Assert.Throws<InvalidOperationException>(() => StrangeSorter.PruneUntilSorted(values, CreateComparerThatThrowsOnThirdComparison(expectedException), RemovalCountStrategy.FloorHalf, new ZeroSampleRandom()));
+        var actualException = Assert.Throws<InvalidOperationException>(() => ThanosSorter.PruneUntilSorted(values, CreateComparerThatThrowsOnThirdComparison(expectedException), RemovalCountStrategy.FloorHalf, new ZeroSampleRandom()));
 
         Assert.Same(expectedException, actualException);
         Assert.Equal(snapshot, values);
@@ -270,7 +270,7 @@ public sealed class StrangeSorterTests
     {
         var values = new List<int> { 3, 1, 2 };
 
-        Assert.Throws<InvalidOperationException>(() => StrangeSorter.PruneUntilSorted(values, comparer: null, RemovalCountStrategy.FloorHalf, new ThrowingRandom()));
+        Assert.Throws<InvalidOperationException>(() => ThanosSorter.PruneUntilSorted(values, comparer: null, RemovalCountStrategy.FloorHalf, new ThrowingRandom()));
     }
 
     [Fact]
@@ -279,7 +279,7 @@ public sealed class StrangeSorterTests
         var values = new List<int> { 3, 1, 2 };
         var expectedException = new InvalidOperationException("The comparer failed.");
 
-        var actualException = Assert.Throws<InvalidOperationException>(() => StrangeSorter.PruneUntilSorted(values, CreateComparerThatThrowsOnThirdComparison(expectedException), RemovalCountStrategy.FloorHalf, new ZeroSampleRandom()));
+        var actualException = Assert.Throws<InvalidOperationException>(() => ThanosSorter.PruneUntilSorted(values, CreateComparerThatThrowsOnThirdComparison(expectedException), RemovalCountStrategy.FloorHalf, new ZeroSampleRandom()));
 
         Assert.Same(expectedException, actualException);
     }
@@ -291,8 +291,8 @@ public sealed class StrangeSorterTests
         var arraySnapshot = (int[])arraySource.Clone();
         var listSource = arraySnapshot.ToList();
 
-        var arrayResult = StrangeSorter.PruneUntilSorted(arraySource);
-        StrangeSorter.PruneUntilSorted(listSource);
+        var arrayResult = ThanosSorter.PruneUntilSorted(arraySource);
+        ThanosSorter.PruneUntilSorted(listSource);
 
         AssertOrdered(arrayResult);
         AssertOrdered(listSource);

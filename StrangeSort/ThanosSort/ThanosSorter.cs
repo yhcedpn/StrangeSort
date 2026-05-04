@@ -1,20 +1,20 @@
-namespace StrangeSort;
+namespace StrangeSort.ThanosSort;
 
 /// <summary>
-/// 提供随机剪枝帮助方法，通过删除元素直到序列按比较器定义变为有序。
+/// 提供 ThanosSort 随机剪枝帮助方法，通过删除元素直到序列按比较器定义变为有序。
 /// </summary>
 /// <remarks>
 /// <para>“有序”表示每一对相邻元素都满足 <c>comparer.Compare(previous, current) &lt;= 0</c>。</para>
 /// <para>此类型不单独提供升序或降序标志。若要朝自然降序方向剪枝，请传入反向比较器。</para>
-/// <para>此算法不是传统排序。它会反复随机删除当前序列的一半元素，因此结果是一个有序子序列，且存活元素保持原有相对顺序。</para>
+/// <para>ThanosSort 不是传统排序。它会反复随机删除当前序列的一半元素，因此结果是一个有序子序列，且存活元素保持原有相对顺序。</para>
 /// <para>数组重载绝不会修改输入数组，并以数组形式返回最终子序列。列表重载会原地修改输入列表。</para>
 /// <para>此首个版本有意只公开将比较器参数放在固定位置的重载；不提供可直接跳过比较器并指定删除策略或随机源的公共重载。</para>
 /// <para>对于没有有意义默认顺序的类型，请传入显式比较器。如果元素类型的默认比较器无法比较这些值，则只有在实际需要比较时才会观察到原始 <see cref="ArgumentException"/>。空输入和单元素输入无需比较即可成功。</para>
 /// </remarks>
-public static class StrangeSorter
+public static class ThanosSorter
 {
     /// <summary>
-    /// 通过反复随机删除数组中的一半元素直到其变为有序，返回一个有序子序列。
+    /// 执行 ThanosSort，通过反复随机删除数组中的一半元素直到其变为有序，返回一个有序子序列。
     /// </summary>
     /// <remarks>
     /// 此重载使用 <see cref="Comparer{T}.Default"/>、<see cref="RemovalCountStrategy.FloorHalf"/> 和 <see cref="Random.Shared"/>。
@@ -29,7 +29,7 @@ public static class StrangeSorter
     }
 
     /// <summary>
-    /// 通过反复随机删除数组中的一半元素直到其变为有序，返回一个有序子序列。
+    /// 执行 ThanosSort，通过反复随机删除数组中的一半元素直到其变为有序，返回一个有序子序列。
     /// </summary>
     /// <remarks>
     /// 此重载使用提供的比较器；当 <paramref name="comparer"/> 为 <see langword="null"/> 时使用 <see cref="Comparer{T}.Default"/>，并搭配 <see cref="RemovalCountStrategy.FloorHalf"/> 和 <see cref="Random.Shared"/>。
@@ -45,7 +45,7 @@ public static class StrangeSorter
     }
 
     /// <summary>
-    /// 通过反复随机删除数组中的一半元素直到其变为有序，返回一个有序子序列。
+    /// 执行 ThanosSort，通过反复随机删除数组中的一半元素直到其变为有序，返回一个有序子序列。
     /// </summary>
     /// <remarks>
     /// 此重载使用提供的比较器；当 <paramref name="comparer"/> 为 <see langword="null"/> 时使用 <see cref="Comparer{T}.Default"/>，并搭配提供的删除策略和 <see cref="Random.Shared"/>。
@@ -63,7 +63,7 @@ public static class StrangeSorter
     }
 
     /// <summary>
-    /// 通过反复随机删除数组中的一半元素直到其变为有序，返回一个有序子序列。
+    /// 执行 ThanosSort，通过反复随机删除数组中的一半元素直到其变为有序，返回一个有序子序列。
     /// </summary>
     /// <param name="values">要剪枝的数组。</param>
     /// <param name="comparer">定义目标顺序的比较器。为 <see langword="null"/> 时使用 <see cref="Comparer{T}.Default"/>。</param>
@@ -96,7 +96,7 @@ public static class StrangeSorter
     }
 
     /// <summary>
-    /// 通过反复随机删除列表中的一半元素直到其变为有序。
+    /// 执行 ThanosSort，通过反复随机删除列表中的一半元素直到其变为有序。
     /// </summary>
     /// <remarks>
     /// 此重载使用 <see cref="Comparer{T}.Default"/>、<see cref="RemovalCountStrategy.FloorHalf"/> 和 <see cref="Random.Shared"/>。
@@ -111,7 +111,7 @@ public static class StrangeSorter
     }
 
     /// <summary>
-    /// 通过反复随机删除列表中的一半元素直到其变为有序。
+    /// 执行 ThanosSort，通过反复随机删除列表中的一半元素直到其变为有序。
     /// </summary>
     /// <remarks>
     /// 此重载使用提供的比较器；当 <paramref name="comparer"/> 为 <see langword="null"/> 时使用 <see cref="Comparer{T}.Default"/>，并搭配 <see cref="RemovalCountStrategy.FloorHalf"/> 和 <see cref="Random.Shared"/>。
@@ -127,7 +127,7 @@ public static class StrangeSorter
     }
 
     /// <summary>
-    /// 通过反复随机删除列表中的一半元素直到其变为有序。
+    /// 执行 ThanosSort，通过反复随机删除列表中的一半元素直到其变为有序。
     /// </summary>
     /// <remarks>
     /// 此重载使用提供的比较器；当 <paramref name="comparer"/> 为 <see langword="null"/> 时使用 <see cref="Comparer{T}.Default"/>，并搭配提供的删除策略和 <see cref="Random.Shared"/>。
@@ -145,7 +145,7 @@ public static class StrangeSorter
     }
 
     /// <summary>
-    /// 通过反复随机删除列表中的一半元素直到其变为有序。
+    /// 执行 ThanosSort，通过反复随机删除列表中的一半元素直到其变为有序。
     /// </summary>
     /// <remarks>
     /// 如果在剪枝开始后比较器或随机源抛出异常，列表可能已经被部分修改，且不会回滚。

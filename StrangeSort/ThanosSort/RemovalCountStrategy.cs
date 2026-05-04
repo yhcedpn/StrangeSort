@@ -1,4 +1,4 @@
-namespace StrangeSort;
+namespace StrangeSort.ThanosSort;
 
 /// <summary>
 /// 指定当前序列长度为奇数时，每轮剪枝删除多少个元素。
