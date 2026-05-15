@@ -42,11 +42,12 @@ public sealed class EpsteinSorterTests
         var retainedSnapshot = (int[])retainedValues.Clone();
         var removedValues = new[] { 18 };
         var removedSnapshot = (int[])removedValues.Clone();
+        int[] expectedRetainedResult = [7];
 
         var retainedResult = EpsteinSorter.RetainOnlyMinorsAndSort(retainedValues);
         var removedResult = EpsteinSorter.RetainOnlyMinorsAndSort(removedValues);
 
-        Assert.Equal(new[] { 7 }, retainedResult);
+        Assert.Equal(expectedRetainedResult, retainedResult);
         Assert.NotSame(retainedValues, retainedResult);
         Assert.Equal(retainedSnapshot, retainedValues);
 
@@ -59,11 +60,12 @@ public sealed class EpsteinSorterTests
     {
         var retainedValues = new List<int> { 7 };
         var removedValues = new List<int> { -1 };
+        int[] expectedRetainedValues = [7];
 
         EpsteinSorter.RetainOnlyMinorsAndSort(retainedValues);
         EpsteinSorter.RetainOnlyMinorsAndSort(removedValues);
 
-        Assert.Equal(new[] { 7 }, retainedValues);
+        Assert.Equal(expectedRetainedValues, retainedValues);
         Assert.Empty(removedValues);
     }
 
@@ -72,10 +74,11 @@ public sealed class EpsteinSorterTests
     {
         var values = new[] { 18, 0, -5, 17, 5, 18, 2, -1 };
         var snapshot = (int[])values.Clone();
+        int[] expected = [0, 2, 5, 17];
 
         var result = EpsteinSorter.RetainOnlyMinorsAndSort(values);
 
-        Assert.Equal(new[] { 0, 2, 5, 17 }, result);
+        Assert.Equal(expected, result);
         Assert.NotSame(values, result);
         Assert.Equal(snapshot, values);
         AssertOrdered(result);
@@ -85,10 +88,11 @@ public sealed class EpsteinSorterTests
     public void RetainOnlyMinorsAndSort_List_BoundariesAndSorting_AreAppliedInPlace()
     {
         var values = new List<int> { 18, 0, -5, 17, 5, 18, 2, -1 };
+        int[] expected = [0, 2, 5, 17];
 
         EpsteinSorter.RetainOnlyMinorsAndSort(values);
 
-        Assert.Equal(new[] { 0, 2, 5, 17 }, values);
+        Assert.Equal(expected, values);
         AssertOrdered(values);
     }
 
@@ -203,9 +207,9 @@ public sealed class EpsteinSorterTests
         Assert.All(values, value => Assert.InRange(value, 0, 17));
     }
 
-    private static void AssertOrdered<T>(IReadOnlyList<T> values, IComparer<T>? comparer = null)
+    private static void AssertOrdered(IReadOnlyList<int> values, Comparer<int>? comparer = null)
     {
-        comparer ??= Comparer<T>.Default;
+        comparer ??= Comparer<int>.Default;
 
         for (var index = 1; index < values.Count; index++)
         {
@@ -213,7 +217,7 @@ public sealed class EpsteinSorterTests
         }
     }
 
-    private static IComparer<int> CreateComparerThatThrowsOnFirstComparison(Exception exception)
+    private static Comparer<int> CreateComparerThatThrowsOnFirstComparison(Exception exception)
     {
         var hasThrown = false;
 

@@ -153,12 +153,14 @@ public sealed class ThanosSorterTests
     public void PruneUntilSorted_FloorAndCeilingHalf_CanProduceDifferentResultsOnOddLengthInput()
     {
         var values = new[] { 3, 1, 2 };
+        int[] expectedFloorResult = [1, 2];
+        int[] expectedCeilingResult = [2];
 
         var floorResult = ThanosSorter.PruneUntilSorted((int[])values.Clone(), comparer: null, RemovalCountStrategy.FloorHalf, new ZeroSampleRandom());
         var ceilingResult = ThanosSorter.PruneUntilSorted((int[])values.Clone(), comparer: null, RemovalCountStrategy.CeilingHalf, new ZeroSampleRandom());
 
-        Assert.Equal(new[] { 1, 2 }, floorResult);
-        Assert.Equal(new[] { 2 }, ceilingResult);
+        Assert.Equal(expectedFloorResult, floorResult);
+        Assert.Equal(expectedCeilingResult, ceilingResult);
         AssertOrdered(floorResult);
         AssertOrdered(ceilingResult);
         AssertSubsequence(floorResult, values);
@@ -328,7 +330,7 @@ public sealed class ThanosSorterTests
         }
     }
 
-    private static IComparer<int> CreateComparerThatThrowsOnThirdComparison(Exception exception)
+    private static Comparer<int> CreateComparerThatThrowsOnThirdComparison(Exception exception)
     {
         var compareCount = 0;
 

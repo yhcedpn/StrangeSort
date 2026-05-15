@@ -127,7 +127,7 @@ public static class StalinSorter
         return writeIndex;
     }
 
-    private static int CompactOrderedSubsequence<T>(IList<T> values, int length, IComparer<T> comparer)
+    private static int CompactOrderedSubsequence<T>(List<T> values, int length, IComparer<T> comparer)
     {
         var writeIndex = 1;
         var lastKept = values[0];

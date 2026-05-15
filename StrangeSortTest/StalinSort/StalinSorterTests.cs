@@ -71,10 +71,11 @@ public sealed class StalinSorterTests
     {
         var values = new[] { 2, 1, 3, 2, 4 };
         var snapshot = (int[])values.Clone();
+        int[] expected = [2, 3, 4];
 
         var result = StalinSorter.RemoveOutOfOrder(values);
 
-        Assert.Equal(new[] { 2, 3, 4 }, result);
+        Assert.Equal(expected, result);
         Assert.Equal(snapshot, values);
         AssertOrdered(result);
         AssertSubsequence(result, snapshot);
@@ -85,10 +86,11 @@ public sealed class StalinSorterTests
     {
         var values = new List<int> { 2, 1, 3, 2, 4 };
         var snapshot = values.ToArray();
+        int[] expected = [2, 3, 4];
 
         StalinSorter.RemoveOutOfOrder(values);
 
-        Assert.Equal(new[] { 2, 3, 4 }, values);
+        Assert.Equal(expected, values);
         AssertOrdered(values);
         AssertSubsequence(values, snapshot);
     }
@@ -182,26 +184,28 @@ public sealed class StalinSorterTests
     public void RemoveOutOfOrder_Semantics_ThreeOneTwo_MustReturnThree()
     {
         var source = new[] { 3, 1, 2 };
+        int[] expected = [3];
         var arrayResult = StalinSorter.RemoveOutOfOrder((int[])source.Clone());
         var listResult = source.ToList();
 
         StalinSorter.RemoveOutOfOrder(listResult);
 
-        Assert.Equal(new[] { 3 }, arrayResult);
-        Assert.Equal(new[] { 3 }, listResult);
+        Assert.Equal(expected, arrayResult);
+        Assert.Equal(expected, listResult);
     }
 
     [Fact]
     public void RemoveOutOfOrder_Semantics_OneThreeTwoFour_MustReturnOneThreeFour()
     {
         var source = new[] { 1, 3, 2, 4 };
+        int[] expected = [1, 3, 4];
         var arrayResult = StalinSorter.RemoveOutOfOrder((int[])source.Clone());
         var listResult = source.ToList();
 
         StalinSorter.RemoveOutOfOrder(listResult);
 
-        Assert.Equal(new[] { 1, 3, 4 }, arrayResult);
-        Assert.Equal(new[] { 1, 3, 4 }, listResult);
+        Assert.Equal(expected, arrayResult);
+        Assert.Equal(expected, listResult);
     }
 
     private static void AssertOrdered<T>(IReadOnlyList<T> values, IComparer<T>? comparer = null)
@@ -214,24 +218,24 @@ public sealed class StalinSorterTests
         }
     }
 
-    private static void AssertSubsequence<T>(IReadOnlyList<T> subsequence, IReadOnlyList<T> source)
+    private static void AssertSubsequence(IReadOnlyList<int> subsequence, int[] source)
     {
         var sourceIndex = 0;
-        var equalityComparer = EqualityComparer<T>.Default;
+        var equalityComparer = EqualityComparer<int>.Default;
 
         foreach (var item in subsequence)
         {
-            while (sourceIndex < source.Count && !equalityComparer.Equals(source[sourceIndex], item))
+            while (sourceIndex < source.Length && !equalityComparer.Equals(source[sourceIndex], item))
             {
                 sourceIndex++;
             }
 
-            Assert.True(sourceIndex < source.Count);
+            Assert.True(sourceIndex < source.Length);
             sourceIndex++;
         }
     }
 
-    private static IComparer<int> CreateComparerThatThrowsOnThirdComparison(Exception exception)
+    private static Comparer<int> CreateComparerThatThrowsOnThirdComparison(Exception exception)
     {
         var compareCount = 0;
 

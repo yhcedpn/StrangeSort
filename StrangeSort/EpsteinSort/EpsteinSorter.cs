@@ -49,7 +49,7 @@ public static class EpsteinSorter
         comparer ??= Comparer<T>.Default;
         if (values.Length == 0)
         {
-            return Array.Empty<T>();
+            return [];
         }
 
         var upperBound = T.CreateChecked(18);
@@ -59,7 +59,7 @@ public static class EpsteinSorter
 
         if (retainedCount == 0)
         {
-            return Array.Empty<T>();
+            return [];
         }
 
         if (retainedCount == buffer.Length)
@@ -140,7 +140,7 @@ public static class EpsteinSorter
         return writeIndex;
     }
 
-    private static int CompactRetainedValues<T>(IList<T> values, T upperBound)
+    private static int CompactRetainedValues<T>(List<T> values, T upperBound)
         where T : INumber<T>
     {
         var writeIndex = 0;
