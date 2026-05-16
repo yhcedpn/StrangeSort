@@ -1,3 +1,20 @@
+## [2.3.0] - 2026-05-16
+
+### 🚀 Features
+
+- 添加 BrezhnevSort RewriteAsOrdinalSequence (#5)
+
+### 📚 Documentation
+
+- 添加 CHANGELOG
+- 补充 Git 与 GitHub 交互说明
+- 补充 GitHub Pull Request 规范
+- 补充 Pull Request 模板中的关联 Issue 项
+
+### ⚙️ Miscellaneous Tasks
+
+- 添加 git-cliff 配置
+- 添加 GitHub Pull Request 模板
 ## [2.2.1] - 2026-05-15
 
 ### 🚜 Refactor
