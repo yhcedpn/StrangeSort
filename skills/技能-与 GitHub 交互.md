@@ -8,5 +8,5 @@
 ## Pull Request 规范
 
 1. 你需要根据 .github/pull_request_template.md 提供的模板创建 Pull Request
-2. 你需要将用户提供的与该 Pull Request 关联的 Issue 填入模板，以实现在 Pull Request 合并时自动使相关 Issue 关闭。
+2. 你需要将用户提供的与该 Pull Request 关联的 Issue 填入模板，以实现在 Pull Request 合并时自动使相关 Issue 关闭。如果用户没有提供，提示用户。如果用户明确说明不需要关联，你才能不填关联 Issue 到模板中。
 
