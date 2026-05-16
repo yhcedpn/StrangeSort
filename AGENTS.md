@@ -25,7 +25,7 @@
 
 ### 技能：与 GitHub 交互
 
-当用户要求你与 GitHub 交互，例如访问 GitHub 仓库，将本地变更推送到 GitHub 仓库，阅读 技能-与 GitHub 交互.md 这个文件，按照里面的要求执行。
+当用户要求你与 GitHub 交互，例如访问 GitHub 仓库，将本地变更推送到 GitHub 仓库，创建 Pull Request 或 Issue 对象，阅读 技能-与 GitHub 交互.md 这个文件，按照里面的要求执行。
 
 ## 规范文件
 
