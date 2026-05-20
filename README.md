@@ -2,11 +2,12 @@
 
 `StrangeSort` 是一个基于 .NET 10 的 C# 类库，只收录和实现几种冠以**经典人物的名字**的奇异算法。
 
-这个仓库当前包含 3 组公开算法：
+这个仓库当前包含 4 组公开算法：
 
 - `StalinSort`：从左到右删除违序元素，保留一个有序子序列。大力清洗所有不符合要求的元素！
 - `ThanosSort`：随机删除当前序列的一半元素，重复执行直到序列有序。一键清除多余元素，剩下多少你别问，嘿嘿。
 - `EpsteinSort`：先保留数值区间 `[0, 18)` 内的元素，再对保留元素排序。只保留未成年数字，太老的全部斩杀！
+- `BrezhnevSort`：无视输入值本身，只根据输入长度把结果改写为从 `1` 到 `n` 的序数序列。内容不重要，排场最重要！
 
 ## 作者的话
 
@@ -29,6 +30,7 @@
 using StrangeSort.StalinSort;
 using StrangeSort.ThanosSort;
 using StrangeSort.EpsteinSort;
+using StrangeSort.BrezhnevSort;
 ```
 
 ## 算法总览
@@ -38,6 +40,7 @@ using StrangeSort.EpsteinSort;
 | StalinSort | `StrangeSort.StalinSort` | 从左到右删除相对最近保留元素违序的元素 | 否，只删除 | 否 |
 | ThanosSort | `StrangeSort.ThanosSort` | 每轮随机删除一半元素，直到结果有序 | 否，只删除 | 是 |
 | EpsteinSort | `StrangeSort.EpsteinSort` | 先过滤到 `[0, 18)`，再排序 | 是，会排序保留元素 | 否 |
+| BrezhnevSort | `StrangeSort.BrezhnevSort` | 无视原值，只按输入长度生成 `1..n` | 否，不重排，但会重写所有值 | 否 |
 
 ## StalinSort
 
@@ -343,6 +346,92 @@ var list = new List<double>
 };
 EpsteinSorter.RetainOnlyMinorsAndSort(list);
 // list = [0.0, 3.5, 17.25]
+```
+
+## BrezhnevSort
+
+### 算法说明
+
+`BrezhnevSort` 不是传统排序。它不会比较、筛选或重排输入元素，而是只根据输入长度生成一个固定结果：
+
+- 输入长度为 `n`
+- 输出内容固定为从 `1` 到 `n` 的序数序列
+- 输入元素原有的值不会被读取，也不会影响输出结果
+
+因此，两个长度相同但内容完全不同的输入，会得到相同的输出。
+
+例如：
+
+- 输入：`[999, -3, 42]`
+- 输出：`[1, 2, 3]`
+
+### 公共 API
+
+```csharp
+public static T[] RewriteAsOrdinalSequence<T>(T[] values)
+    where T : INumber<T>
+
+public static void RewriteAsOrdinalSequence<T>(List<T> values)
+    where T : INumber<T>
+```
+
+### 输入与输出
+
+数组重载：
+
+- 输入：`T[] values`
+- 类型约束：`T : INumber<T>`
+- 输出：`T[]`
+- 行为：不修改输入数组，返回一个新的结果数组
+- 特别说明：
+  - 返回数组长度与输入数组一致
+  - 返回内容固定为 `1..n`
+  - 输入数组中的原始值不会影响结果
+  - 即使输入本身已经是 `1..n`，也仍然返回新数组而不是原数组引用
+
+`List<T>` 重载：
+
+- 输入：`List<T> values`
+- 类型约束：`T : INumber<T>`
+- 输出：无返回值，结果直接写回原列表
+- 行为：原地把整个列表改写为 `1..n`
+- 特别说明：
+  - 空列表保持为空
+  - 原列表中的原始值不会影响结果
+
+### 异常
+
+所有重载都可能出现：
+
+- `ArgumentNullException`
+  - `values == null`
+
+所有重载都还可能出现：
+
+- `OverflowException`
+  - 当输入长度超出 `T` 可表示范围时抛出
+  - 例如对 `byte` 来说，长度达到 `256` 就无法表示
+
+数组重载异常特征：
+
+- 如果抛出异常，输入数组不会被修改
+
+`List<T>` 重载异常特征：
+
+- 如果在改写途中因数值转换溢出抛出异常，列表可能已经被部分修改
+- 该修改不会回滚
+
+### 调用示例
+
+```csharp
+var values = new[] { 999, -3, 42, 0 };
+var result = BrezhnevSorter.RewriteAsOrdinalSequence(values);
+// result = [1, 2, 3, 4]
+// values 保持不变
+
+var list = new List<int> { 100, -5, 8 };
+BrezhnevSorter.RewriteAsOrdinalSequence(list);
+// list = [1, 2, 3]
 ```
 
 ## 鸣谢
