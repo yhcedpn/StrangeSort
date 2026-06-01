@@ -2,12 +2,13 @@
 
 `StrangeSort` 是一个基于 .NET 10 的 C# 类库，只收录和实现几种冠以**经典人物的名字**的奇异算法。
 
-这个仓库当前包含 4 组公开算法：
+这个仓库当前包含 5 组公开算法：
 
 - `StalinSort`：从左到右删除违序元素，保留一个有序子序列。大力清洗所有不符合要求的元素！
 - `ThanosSort`：随机删除当前序列的一半元素，重复执行直到序列有序。一键清除多余元素，剩下多少你别问，嘿嘿。
 - `EpsteinSort`：先保留数值区间 `[0, 18)` 内的元素，再对保留元素排序。只保留未成年数字，太老的全部斩杀！
 - `BrezhnevSort`：无视输入值本身，只根据输入长度把结果改写为从 `1` 到 `n` 的序数序列。内容不重要，排场最重要！
+- `TrumpSort`：对输入内容执行一次随机重排。具体发生了什么不重要，先赢再说！
 
 ## 作者的话
 
@@ -31,6 +32,7 @@ using StrangeSort.StalinSort;
 using StrangeSort.ThanosSort;
 using StrangeSort.EpsteinSort;
 using StrangeSort.BrezhnevSort;
+using StrangeSort.TrumpSort;
 ```
 
 ## 算法总览
@@ -41,6 +43,7 @@ using StrangeSort.BrezhnevSort;
 | ThanosSort | `StrangeSort.ThanosSort` | 每轮随机删除一半元素，直到结果有序 | 否，只删除 | 是 |
 | EpsteinSort | `StrangeSort.EpsteinSort` | 先过滤到 `[0, 18)`，再排序 | 是，会排序保留元素 | 否 |
 | BrezhnevSort | `StrangeSort.BrezhnevSort` | 无视原值，只按输入长度生成 `1..n` | 否，不重排，但会重写所有值 | 否 |
+| TrumpSort | `StrangeSort.TrumpSort` | 对输入执行一次 Fisher-Yates 随机重排 | 是，重排全部元素 | 是 |
 
 ## StalinSort
 
@@ -432,6 +435,93 @@ var result = BrezhnevSorter.RewriteAsOrdinalSequence(values);
 var list = new List<int> { 100, -5, 8 };
 BrezhnevSorter.RewriteAsOrdinalSequence(list);
 // list = [1, 2, 3]
+```
+
+## TrumpSort
+
+### 算法说明
+
+`TrumpSort` 不是传统排序。它不会保证结果有序，而是对输入序列执行一次 Fisher-Yates 随机重排。
+
+它的行为是：
+
+- 遍历序列尾部到头部的位置。
+- 对每个位置随机选择一个不超过当前位置的索引。
+- 交换这两个位置上的元素。
+
+因此，输出结果与输入包含完全相同的元素多重集，只是顺序被随机打乱。
+
+例如：
+
+- 输入：`[1, 2, 3, 4]`
+- 可能输出：`[3, 1, 4, 2]`
+
+### 公共 API
+
+```csharp
+public static T[] ShuffleAndWin<T>(T[] values)
+public static T[] ShuffleAndWin<T>(T[] values, Random random)
+public static void ShuffleAndWin<T>(List<T> values)
+public static void ShuffleAndWin<T>(List<T> values, Random random)
+```
+
+### 输入与输出
+
+数组重载：
+
+- 输入：`T[] values`
+- 可选输入：`Random random`
+- 输出：`T[]`
+- 行为：不修改输入数组，返回一个新的随机排列结果数组
+- 默认值：`random` 未显式传入时使用 `Random.Shared`
+- 特别说明：
+  - 返回数组长度与输入数组一致
+  - 返回数组与输入数组包含相同的元素多重集
+  - 即使输入为空数组或单元素数组，也会返回新的结果数组而不是原数组引用
+  - 使用相同随机种子时，结果可复现
+
+`List<T>` 重载：
+
+- 输入：`List<T> values`
+- 可选输入：`Random random`
+- 输出：无返回值，结果直接写回原列表
+- 行为：原地执行一次随机重排
+- 默认值：`random` 未显式传入时使用 `Random.Shared`
+- 特别说明：
+  - 列表长度保持不变
+  - 列表中的元素多重集保持不变
+  - 使用相同随机种子时，结果可复现
+  - 对相同输入使用相同随机种子时，数组重载和列表重载会得到一致内容
+
+### 异常
+
+所有重载都可能出现：
+
+- `ArgumentNullException`
+  - `values == null`
+
+带 `random` 参数的重载还可能出现：
+
+- `ArgumentNullException`
+  - `random == null`
+
+随机源相关异常：
+
+- 随机源自己抛出的异常会直接向外传播
+- 对数组重载，如果随机源在处理中抛出异常，输入数组不会被修改
+- 对 `List<T>` 重载，如果随机源在处理中抛出异常，列表可能已经被部分修改，且不会回滚
+
+### 调用示例
+
+```csharp
+var values = new[] { 1, 2, 3, 4, 5 };
+var result = TrumpSorter.ShuffleAndWin(values, new Random(2026));
+// result 是 values 的一个随机排列
+// values 保持不变
+
+var list = new List<int> { 1, 2, 3, 4, 5 };
+TrumpSorter.ShuffleAndWin(list, new Random(2026));
+// list 被原地随机重排
 ```
 
 ## 鸣谢
