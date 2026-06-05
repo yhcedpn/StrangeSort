@@ -22,21 +22,17 @@ body = """
 """
 # Remove leading and trailing whitespaces from the changelog's body.
 trim = true
-# 没有可生成的条目时不渲染空的 [unreleased]，避免误判为需要更新文件。
-render_always = false
+# Render body even when there are no releases to process.
+render_always = true
 # An array of regex based postprocessors to modify the changelog.
 postprocessors = [
     # Replace the placeholder <REPO> with a URL.
     #{ pattern = '<REPO>', replace = "https://github.com/orhun/git-cliff" },
 ]
-# 该仓库维护 CHANGELOG.md 时，显式使用命令行参数指定写入方式，避免误执行
-# `git cliff -u` 时直接覆盖现有文件。
-#
-# 追加最新 tag 到 CHANGELOG.md 顶部：
-# git cliff --latest --prepend CHANGELOG.md
-#
-# 预览未发布变更（仅包含尚未归属到 tag 的提交）：
-# git cliff -u
+# render body even when there are no releases to process
+# render_always = true
+# output file path
+# output = "test.md"
 
 [git]
 # Parse commits according to the conventional commits specification.
