@@ -1,0 +1,8 @@
+- [Home](Home)
+- [Getting Started](Getting-Started)
+- [Algorithm Overview](Algorithm-Overview)
+- [StalinSort Reference](StalinSort-Reference)
+- [ThanosSort Reference](ThanosSort-Reference)
+- [EpsteinSort Reference](EpsteinSort-Reference)
+- [BrezhnevSort Reference](BrezhnevSort-Reference)
+- [TrumpSort Reference](TrumpSort-Reference)
