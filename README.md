@@ -56,8 +56,8 @@ using StrangeSort.TrumpSort;
 - BrezhnevSort Reference：<https://github.com/yhcedpn/StrangeSort/wiki/BrezhnevSort-Reference>
 - TrumpSort Reference：<https://github.com/yhcedpn/StrangeSort/wiki/TrumpSort-Reference>
 
-公开行为契约以规范文件为准，`README.md` 与 GitHub Wiki 只承担项目介绍、导航和补充说明职责：<https://github.com/yhcedpn/StrangeSort/blob/main/specs/StrangeSort%20%E9%A1%B9%E7%9B%AE%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83.md>
+公开行为契约以规范文件为准，`README.md` 与 GitHub Wiki 只承担项目介绍、导航和补充说明职责：[StrangeSort 项目开发规范](https://github.com/yhcedpn/StrangeSort/blob/main/specs/StrangeSort%20%E9%A1%B9%E7%9B%AE%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83.md)
 
 ## 鸣谢
 
-感谢 GPT-5.4 模型完成了这个项目！哈哈，可以说，它的能力让人叹为观止，毫无疑问是强大的生产力工具。
+感谢 GPT-5.4 模型搭建并全权维护本项目！可以说，它的能力让人叹为观止，我指哪打哪，毫无疑问是强大的生产力工具。
