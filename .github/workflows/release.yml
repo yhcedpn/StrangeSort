@@ -4,13 +4,19 @@ on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "要发布的既有 tag，例如 v1.0.0"
+        required: true
+        type: string
 
 permissions:
   contents: write
   packages: write
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ github.event.inputs.tag || github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -18,17 +24,18 @@ jobs:
     runs-on: ubuntu-latest
     environment: release
     env:
-      TAG_NAME: ${{ github.ref_name }}
+      TAG_NAME: ${{ github.event.inputs.tag || github.ref_name }}
       PACKAGE_OUTPUT_DIR: artifacts
-      CHANGELOG_BRANCH: automation/changelog-${{ github.ref_name }}
-      CHANGELOG_COMMIT_MESSAGE: "docs: 更新 CHANGELOG 文件 ${{ github.ref_name }}"
-      CHANGELOG_PR_TITLE: "docs: 更新 CHANGELOG 文件 ${{ github.ref_name }}"
+      CHANGELOG_BRANCH: automation/changelog-${{ github.event.inputs.tag || github.ref_name }}
+      CHANGELOG_COMMIT_MESSAGE: "docs: 更新 CHANGELOG 文件 ${{ github.event.inputs.tag || github.ref_name }}"
+      CHANGELOG_PR_TITLE: "docs: 更新 CHANGELOG 文件 ${{ github.event.inputs.tag || github.ref_name }}"
       NUGET_SOURCE_URL: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
 
     steps:
       - name: Checkout tagged commit
         uses: actions/checkout@v6
         with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
           fetch-depth: 0
 
       - name: Validate tag format and main ancestry
@@ -46,8 +53,15 @@ jobs:
           git fetch origin +refs/heads/main:refs/remotes/origin/main
           git fetch --force --tags origin
 
-          if ! git merge-base --is-ancestor "${GITHUB_SHA}" "origin/main"; then
-            echo "当前 tag 指向的提交不在 origin/main 历史中：${GITHUB_SHA}" >&2
+          TAG_COMMIT="$(git rev-list -n 1 "${TAG_NAME}" 2>/dev/null || true)"
+
+          if [[ -z "${TAG_COMMIT}" ]]; then
+            echo "未找到目标 tag：${TAG_NAME}" >&2
+            exit 1
+          fi
+
+          if ! git merge-base --is-ancestor "${TAG_COMMIT}" "origin/main"; then
+            echo "当前 tag 指向的提交不在 origin/main 历史中：${TAG_COMMIT}" >&2
             exit 1
           fi
 
@@ -102,27 +116,12 @@ jobs:
               --skip-duplicate
           done
 
-      - name: Determine changelog range
-        id: changelog_range
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          PREVIOUS_TAG="$(git describe --tags --abbrev=0 "${TAG_NAME}^" --match 'v[0-9]*.[0-9]*.[0-9]*' 2>/dev/null || true)"
-
-          if [[ -z "${PREVIOUS_TAG}" ]]; then
-            echo "未找到当前稳定 tag 之前的稳定 tag，无法生成增量 changelog 片段。" >&2
-            exit 1
-          fi
-
-          echo "range=${PREVIOUS_TAG}..${TAG_NAME}" >> "${GITHUB_OUTPUT}"
-
       - name: Generate current tag changelog fragment
         id: git_cliff
         uses: orhun/git-cliff-action@v4
         with:
           config: cliff.toml
-          args: --strip all ${{ steps.changelog_range.outputs.range }}
+          args: --current --strip all
         env:
           OUTPUT: current-release-notes.md
           GITHUB_REPO: ${{ github.repository }}
