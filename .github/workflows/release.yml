@@ -1,0 +1,251 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: release
+    env:
+      TAG_NAME: ${{ github.ref_name }}
+      PACKAGE_OUTPUT_DIR: artifacts
+      CHANGELOG_BRANCH: automation/changelog-${{ github.ref_name }}
+      CHANGELOG_COMMIT_MESSAGE: "docs: 更新 CHANGELOG 文件 ${{ github.ref_name }}"
+      CHANGELOG_PR_TITLE: "docs: 更新 CHANGELOG 文件 ${{ github.ref_name }}"
+      NUGET_SOURCE_URL: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+
+    steps:
+      - name: Checkout tagged commit
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Validate tag format and main ancestry
+        id: validate_tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! "${TAG_NAME}" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "稳定版本 tag 必须匹配 vX.Y.Z：${TAG_NAME}" >&2
+            exit 1
+          fi
+
+          VERSION="${TAG_NAME#v}"
+          git fetch origin +refs/heads/main:refs/remotes/origin/main
+          git fetch --force --tags origin
+
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" "origin/main"; then
+            echo "当前 tag 指向的提交不在 origin/main 历史中：${GITHUB_SHA}" >&2
+            exit 1
+          fi
+
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+
+      - name: Validate GitHub App configuration
+        shell: bash
+        env:
+          APP_CLIENT_ID: ${{ vars.APP_CLIENT_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${APP_CLIENT_ID}" ]]; then
+            echo "缺少 vars.APP_CLIENT_ID，无法创建 GitHub App token。" >&2
+            exit 1
+          fi
+
+          if [[ -z "${APP_PRIVATE_KEY}" ]]; then
+            echo "缺少 secrets.APP_PRIVATE_KEY，无法创建 GitHub App token。" >&2
+            exit 1
+          fi
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.x
+
+      - name: Pack release artifacts
+        run: dotnet pack StrangeSort/StrangeSort.csproj --configuration Release --output "${PACKAGE_OUTPUT_DIR}" -p:ContinuousIntegrationBuild=true -p:Version="${{ steps.validate_tag.outputs.version }}"
+
+      - name: Publish package to GitHub Packages
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          packages=("${PACKAGE_OUTPUT_DIR}"/*.nupkg)
+
+          if [[ ${#packages[@]} -eq 0 ]]; then
+            echo "未找到 .nupkg 包。" >&2
+            exit 1
+          fi
+
+          # GitHub Packages 只推送主包，符号包改由 GitHub Release 资产提供。
+          for package in "${packages[@]}"; do
+            dotnet nuget push "${package}" \
+              --source "${NUGET_SOURCE_URL}" \
+              --api-key "${GITHUB_TOKEN}" \
+              --skip-duplicate
+          done
+
+      - name: Determine changelog range
+        id: changelog_range
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PREVIOUS_TAG="$(git describe --tags --abbrev=0 "${TAG_NAME}^" --match 'v[0-9]*.[0-9]*.[0-9]*' 2>/dev/null || true)"
+
+          if [[ -z "${PREVIOUS_TAG}" ]]; then
+            echo "未找到当前稳定 tag 之前的稳定 tag，无法生成增量 changelog 片段。" >&2
+            exit 1
+          fi
+
+          echo "range=${PREVIOUS_TAG}..${TAG_NAME}" >> "${GITHUB_OUTPUT}"
+
+      - name: Generate current tag changelog fragment
+        id: git_cliff
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --strip all ${{ steps.changelog_range.outputs.range }}
+        env:
+          OUTPUT: current-release-notes.md
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Create GitHub App token
+        id: app_token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Checkout main for changelog PR
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ steps.app_token.outputs.token }}
+          persist-credentials: false
+          path: changelog-main
+
+      - name: Update CHANGELOG.md
+        id: update_changelog
+        shell: bash
+        env:
+          VERSION: ${{ steps.validate_tag.outputs.version }}
+          CHANGELOG_FRAGMENT_PATH: ${{ steps.git_cliff.outputs.changelog }}
+          CHANGELOG_WORKTREE: ${{ github.workspace }}/changelog-main
+        run: |
+          set -euo pipefail
+
+          CHANGELOG_PATH="${CHANGELOG_WORKTREE}/CHANGELOG.md"
+          VERSION_HEADING="## [${VERSION}] - "
+
+          if [[ -f "${CHANGELOG_PATH}" ]] && grep -Fq "${VERSION_HEADING}" "${CHANGELOG_PATH}"; then
+            echo "needs_pr=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          if [[ -f "${CHANGELOG_PATH}" ]]; then
+            cat "${CHANGELOG_FRAGMENT_PATH}" > "${CHANGELOG_PATH}.new"
+            printf '\n' >> "${CHANGELOG_PATH}.new"
+            cat "${CHANGELOG_PATH}" >> "${CHANGELOG_PATH}.new"
+            mv "${CHANGELOG_PATH}.new" "${CHANGELOG_PATH}"
+          else
+            cp "${CHANGELOG_FRAGMENT_PATH}" "${CHANGELOG_PATH}"
+          fi
+
+          echo "needs_pr=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Create or update changelog PR
+        if: steps.update_changelog.outputs.needs_pr == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ steps.app_token.outputs.token }}
+          branch-token: ${{ steps.app_token.outputs.token }}
+          path: changelog-main
+          add-paths: CHANGELOG.md
+          base: main
+          branch: ${{ env.CHANGELOG_BRANCH }}
+          delete-branch: false
+          commit-message: ${{ env.CHANGELOG_COMMIT_MESSAGE }}
+          title: ${{ env.CHANGELOG_PR_TITLE }}
+          body: |
+            来源 tag：`${{ env.TAG_NAME }}`
+
+            本 PR 由 Release workflow 自动创建，使用 `git-cliff` 增量更新 `CHANGELOG.md`，并已尝试开启 auto-merge。
+
+            更新文件：`CHANGELOG.md`
+            生成工具：`git-cliff`
+
+      - name: Resolve changelog PR
+        if: steps.update_changelog.outputs.needs_pr == 'true'
+        id: resolve_pr
+        shell: bash
+        env:
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          PR_URL="$(gh pr list --repo "${GITHUB_REPOSITORY}" --base main --head "${CHANGELOG_BRANCH}" --state open --json url --jq '.[0].url')"
+
+          if [[ -z "${PR_URL}" || "${PR_URL}" == "null" ]]; then
+            echo "未找到 changelog PR：${CHANGELOG_BRANCH}" >&2
+            exit 1
+          fi
+
+          echo "url=${PR_URL}" >> "${GITHUB_OUTPUT}"
+
+      - name: Enable changelog PR auto-merge
+        if: steps.update_changelog.outputs.needs_pr == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+          PR_URL: ${{ steps.resolve_pr.outputs.url }}
+        run: |
+          set -euo pipefail
+
+          AUTO_MERGE_ENABLED="$(gh pr view "${PR_URL}" --repo "${GITHUB_REPOSITORY}" --json autoMergeRequest --jq '.autoMergeRequest != null')"
+
+          if [[ "${AUTO_MERGE_ENABLED}" == "true" ]]; then
+            exit 0
+          fi
+
+          gh pr merge "${PR_URL}" --repo "${GITHUB_REPOSITORY}" --auto --squash
+
+      - name: Create or update GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHANGELOG_FRAGMENT_PATH: ${{ steps.git_cliff.outputs.changelog }}
+        run: |
+          set -euo pipefail
+
+          if gh release view "${TAG_NAME}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            gh release edit "${TAG_NAME}" --repo "${GITHUB_REPOSITORY}" --title "${TAG_NAME}" --notes-file "${CHANGELOG_FRAGMENT_PATH}"
+          else
+            gh release create "${TAG_NAME}" --repo "${GITHUB_REPOSITORY}" --title "${TAG_NAME}" --notes-file "${CHANGELOG_FRAGMENT_PATH}"
+          fi
+
+      - name: Upload release assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${TAG_NAME}" "${PACKAGE_OUTPUT_DIR}"/*.nupkg "${PACKAGE_OUTPUT_DIR}"/*.snupkg --repo "${GITHUB_REPOSITORY}" --clobber

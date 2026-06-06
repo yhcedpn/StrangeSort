@@ -4,7 +4,24 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>StrangeSort</PackageId>
+    <Description>StrangeSort is a .NET library for delightfully absurd sorting algorithms.</Description>
+    <Authors>yhcedpn</Authors>
+    <PackageTags>sorting;algorithms</PackageTags>
+    <RepositoryUrl>https://github.com/yhcedpn/StrangeSort</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/yhcedpn/StrangeSort</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="/" />
+    <None Include="..\LICENSE.txt" Pack="true" PackagePath="/" />
+  </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <IsAotCompatible>True</IsAotCompatible>
