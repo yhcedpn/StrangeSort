@@ -47,4 +47,4 @@ int[] result = StalinSorter.RemoveOutOfOrder(source);
 
 详见 Wiki：<https://github.com/yhcedpn/StrangeSort/wiki>
 
-公开行为契约以规范文件为准，`README.md` 与 GitHub Wiki 只承担项目介绍、导航和补充说明职责。
+公开行为契约以规范文件为准，`README.md` 与 GitHub Wiki 只承担项目介绍、导航和补充说明职责：[StrangeSort 项目开发规范](https://github.com/yhcedpn/StrangeSort/blob/main/specs/StrangeSort%20%E9%A1%B9%E7%9B%AE%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83.md)
